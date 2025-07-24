@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<!-- saved from url=(0132)blob:https://2e79jisnsgimuyq5e3a2hhdopliljs8rue7ucj4ewpvu5wu632-h775241406.scf.usercontent.goog/0b0837f8-2619-4191-892a-11e98fa95933 -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjM3MTE1MjViZGZmNmM4YmM2NjM2NDE3ZjgwOGMzYzFlYTkyN2E0YmMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6XC9cL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbVwvZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMDE1NjY1MTcyNTA5MDM0MzQ0MCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjXzZmNjUyNDg4Y2Y4OTI5MzRfc3VuZXVuZy1zaW11bGF0b3ItODYyIn0sImV4cCI6MTc1MjA3NTM2OCwiaWF0IjoxNzUyMDcxNzY4LCJhbGciOiJSUzI1NiJ9.TCxYsy-c-F9QlKMbkewN4j_fXjfXAr8iJDe8Uaif03bbNE3q3RWzizNwFtiaZHai0dik9N1VyWZQFdiUHmAgKbIO5qW6yMPato4CMP7cMB7gBP-X75pC5dziGcHlVg4w1WrCzN-sBjIzNb97WMDrAu_-xJXJ2rwvq6m0slZNN19ZCg38gVBZ7jQ5wt2CUNcZZKP_-V_FLRiaVSk9gZC9RJ69BO9lDkd8kiZsNreo_v2NXEr6v45LaLweB5WmIOL2OPlhsdMXErkcAosvLfj55FWHfJc5AsAd2oC7fDOGJC2BId-IAj4FBmYnB26RKsrmeOweJ1C70ZCsjUm6QcOW_Q","c_6f652488cf892934_suneung-simulator-862")</script><script>(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script>
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script>((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-2.5-flash-preview-04-17","imageModelName":"imagen-3.0-generate-002","imageEditModelName":"gemini-2.0-flash-preview-image-generation","videoModelName":"veo-2.0-generate-001","deprecatedTextModelNames":["gemini-2.0-flash"]})</script><script>(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수능 시간 시뮬레이터 (통합 아날로그 시계)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            max-width: 600px; /* Adjusted max-width for single clock layout */
+            width: 100%;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .button-primary {
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+        }
+        .button-primary:hover {
+            background-color: #4338ca;
+            transform: translateY(-1px);
+        }
+        .button-secondary {
+            background-color: #e2e8f0; /* Light gray */
+            color: #4a5568; /* Darker gray */
+        }
+        .button-secondary:hover {
+            background-color: #cbd5e0;
+            transform: translateY(-1px);
+        }
+        .button-danger {
+            background-color: #ef4444; /* Red */
+            color: white;
+        }
+        .button-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-1px);
+        }
+        .global-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Reduced gap */
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            width: 100%;
+        }
+        .start-time-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            justify-content: center;
+        }
+        .start-time-input label {
+            font-weight: 600;
+            color: #2d3748;
+        }
+        .start-time-input input {
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 8px;
+            width: 60px;
+            text-align: center;
+        }
+        .suneung-time-display {
+            font-size: 1.5rem; /* Larger font for main time */
+            font-weight: 700;
+            color: #2d3748;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .main-clock-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        .current-subject-display {
+            font-size: 1.8rem; /* Larger font for subject */
+            font-weight: 700;
+            color: #1a202c;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .relative-clock-wrapper { /* New wrapper for positioning */
+            position: relative;
+            width: 250px; /* Same as clock-container width */
+            height: 250px; /* Same as clock-container height */
+        }
+        .clock-container {
+            width: 100%; /* Fill the wrapper */
+            height: 100%; /* Fill the wrapper */
+            position: relative;
+            border-radius: 50%;
+            background-color: #ffffff;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.15);
+            z-index: 2; /* Ensure clock is above the text */
+        }
+        .clock-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .digital-timer-display {
+            font-size: 1.5rem; /* Larger font for digital timer */
+            font-weight: 700;
+            color: #1a202c;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .hongbanjang-text { /* New style for the text */
+            position: absolute;
+            top: 75px; /* Adjusted position to be just below 12 */
+            left: 50%;
+            transform: translateX(-50%); /* Center horizontally */
+            font-size: 1.1rem; /* Slightly smaller for a logo feel */
+            font-weight: 600;
+            color: #4a5568;
+            background-color: #f8f8f8; /* Changed to match clock face background */
+            padding: 6px 12px; /* Increased padding */
+            border-radius: 6px; /* More rounded corners */
+            box-shadow: none; /* Removed shadow */
+            z-index: 1; /* Ensure text is below the clock */
+            white-space: nowrap; /* Prevent text from wrapping */
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        .modal-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 15px;
+        }
+        .modal-message {
+            font-size: 1.1rem;
+            color: #4a5568;
+            margin-bottom: 25px;
+        }
+        .modal-button {
+            background-color: #4f46e5;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .modal-button:hover {
+            background-color: #4338ca;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 20px;
+            }
+            .button {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+            }
+            .global-controls {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .start-time-input {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .start-time-input input {
+                width: 80px;
+            }
+            .suneung-time-display {
+                font-size: 1.2rem;
+            }
+            .current-subject-display {
+                font-size: 1.5rem;
+            }
+            .relative-clock-wrapper {
+                width: 200px; /* Smaller on mobile */
+                height: 200px; /* Smaller on mobile */
+            }
+            .clock-container {
+                width: 100%;
+                height: 100%;
+            }
+            .digital-timer-display {
+                font-size: 1.2rem;
+            }
+            .hongbanjang-text {
+                font-size: 0.9rem; /* Adjusted for mobile */
+                padding: 4px 8px;
+                top: 60px; /* Adjusted for mobile */
+            }
+            .modal-title {
+                font-size: 1.7rem;
+            }
+            .modal-message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.16 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width: 640px){.container{max-width:640px}}@media (min-width: 768px){.container{max-width:768px}}@media (min-width: 1024px){.container{max-width:1024px}}@media (min-width: 1280px){.container{max-width:1280px}}@media (min-width: 1536px){.container{max-width:1536px}}.mb-3{margin-bottom:0.75rem}.mb-6{margin-bottom:1.5rem}.mt-4{margin-top:1rem}.mb-1{margin-bottom:0.25rem}.w-full{width:100%}.cursor-not-allowed{cursor:not-allowed}.list-inside{list-style-position:inside}.list-disc{list-style-type:disc}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.border{border-width:1px}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255 / var(--tw-bg-opacity, 1))}.p-2{padding:0.5rem}.p-4{padding:1rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.text-center{text-align:center}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.opacity-50{opacity:0.5}.shadow-inner{--tw-shadow:inset 0 2px 4px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:inset 0 2px 4px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}</style></head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">수능 시간 시뮬레이터</h1>
+        <div class="suneung-time-display" id="suneungTimeDisplay">수능 시간: 08:10:00</div>
+
+        <div class="global-controls">
+            <div class="start-time-input">
+                <label for="startHour">입실 시간:</label>
+                <input type="number" id="startHour" value="8" min="0" max="23" class="p-2 border rounded">
+                <label for="startMinute">분:</label>
+                <input type="number" id="startMinute" value="10" min="0" max="59" class="p-2 border rounded">
+            </div>
+            <button id="startAllBtn" class="button button-primary">시뮬레이션 시작</button>
+            <button id="pauseAllBtn" class="button button-secondary opacity-50 cursor-not-allowed" disabled="">일시정지</button>
+            <button id="passBtn" class="button button-secondary opacity-50 cursor-not-allowed" disabled="">현재 교시 통과</button>
+            <button id="resetAllBtn" class="button button-danger opacity-50 cursor-not-allowed" disabled="">초기화</button>
+        </div>
+
+        <div class="main-clock-section">
+            <div class="current-subject-display" id="currentSubjectDisplay">시뮬레이션 대기 중</div>
+            <div class="relative-clock-wrapper">
+                <div class="clock-container">
+                    <canvas id="mainClockCanvas" class="clock-canvas" width="300" height="300"></canvas>
+                </div>
+                <div class="hongbanjang-text">홍반장</div>
+            </div>
+            <div class="digital-timer-display" id="mainDigitalTimerDisplay">--:--</div>
+        </div>
+
+        <div id="scheduleOverview" class="w-full mt-4 p-4 bg-gray-50 rounded-lg shadow-inner">
+            <h3 class="text-xl font-semibold text-gray-700 mb-3 text-center">전체 시험 시간표</h3>
+            <ul id="scheduleList" class="list-disc list-inside text-gray-700"><li id="schedule-item-0" class="py-1 px-2 rounded-md mb-1">입실 및 유의사항: 08:10 ~ 08:40 (30분)</li><li id="schedule-item-1" class="py-1 px-2 rounded-md mb-1">1교시 국어: 08:40 ~ 10:00 (80분)</li><li id="schedule-item-2" class="py-1 px-2 rounded-md mb-1">쉬는 시간: 10:00 ~ 10:20 (20분)</li><li id="schedule-item-3" class="py-1 px-2 rounded-md mb-1">2교시 예비 시간: 10:20 ~ 10:30 (10분)</li><li id="schedule-item-4" class="py-1 px-2 rounded-md mb-1">2교시 수학: 10:30 ~ 12:10 (100분)</li><li id="schedule-item-5" class="py-1 px-2 rounded-md mb-1">점심 시간: 12:10 ~ 13:00 (50분)</li><li id="schedule-item-6" class="py-1 px-2 rounded-md mb-1">3교시 예비 시간: 13:00 ~ 13:10 (10분)</li><li id="schedule-item-7" class="py-1 px-2 rounded-md mb-1">3교시 영어: 13:10 ~ 14:20 (70분)</li><li id="schedule-item-8" class="py-1 px-2 rounded-md mb-1">쉬는 시간: 14:20 ~ 14:40 (20분)</li><li id="schedule-item-9" class="py-1 px-2 rounded-md mb-1">4교시 예비 시간: 14:40 ~ 14:50 (10분)</li><li id="schedule-item-10" class="py-1 px-2 rounded-md mb-1">4교시 한국사: 14:50 ~ 15:20 (30분)</li><li id="schedule-item-11" class="py-1 px-2 rounded-md mb-1">4교시 탐구 영역 문제지 회수/배부: 15:20 ~ 15:35 (15분)</li><li id="schedule-item-12" class="py-1 px-2 rounded-md mb-1">4교시 탐구 영역: 15:35 ~ 16:37 (62분)</li><li id="schedule-item-13" class="py-1 px-2 rounded-md mb-1">쉬는 시간: 16:37 ~ 16:55 (18분)</li><li id="schedule-item-14" class="py-1 px-2 rounded-md mb-1">5교시 예비 시간: 16:55 ~ 17:05 (10분)</li><li id="schedule-item-15" class="py-1 px-2 rounded-md mb-1">5교시 제2외국어/한문: 17:05 ~ 17:45 (40분)</li></ul>
+        </div>
+    </div>
+
+    <!-- Exam Completion Modal -->
+    <div id="completionModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-title">수능 시뮬레이션 완료!</div>
+            <div class="modal-message">모든 시험 일정이 성공적으로 완료되었습니다.<br>수고하셨습니다!</div>
+            <button id="closeModalBtn" class="modal-button">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        // Suneung schedule data with durations
+        const suneungSchedule = [
+            { name: "입실 및 유의사항", duration: 30 * 60, type: "break" }, // 8:10 ~ 8:40
+            { name: "1교시 국어", duration: 80 * 60, type: "subject" }, // 8:40 ~ 10:00
+            { name: "쉬는 시간", duration: 20 * 60, type: "break" },   // 10:00 ~ 10:20
+            { name: "2교시 예비 시간", duration: 10 * 60, type: "break" }, // 10:20 ~ 10:30
+            { name: "2교시 수학", duration: 100 * 60, type: "subject" }, // 10:30 ~ 12:10
+            { name: "점심 시간", duration: 50 * 60, type: "break" },   // 12:10 ~ 13:00
+            { name: "3교시 예비 시간", duration: 10 * 60, type: "break" }, // 13:00 ~ 13:10
+            { name: "3교시 영어", duration: 70 * 60, type: "subject" }, // 13:10 ~ 14:20
+            { name: "쉬는 시간", duration: 20 * 60, type: "break" },   // 14:20 ~ 14:40
+            { name: "4교시 예비 시간", duration: 10 * 60, type: "break" }, // 14:40 ~ 14:50
+            { name: "4교시 한국사", duration: 30 * 60, type: "subject" }, // 14:50 ~ 15:20
+            { name: "4교시 탐구 영역 문제지 회수/배부", duration: 15 * 60, type: "break" }, // 15:20 ~ 15:35
+            { name: "4교시 탐구 영역", duration: 62 * 60, type: "subject" }, // 15:35 ~ 16:37 (30분 + 2분 회수 + 30분)
+            { name: "쉬는 시간", duration: 18 * 60, type: "break" },   // 16:37 ~ 16:55
+            { name: "5교시 예비 시간", duration: 10 * 60, type: "break" }, // 16:55 ~ 17:05
+            { name: "5교시 제2외국어/한문", duration: 40 * 60, type: "subject" } // 17:05 ~ 17:45
+        ];
+
+        let globalTimerInterval = null; // Interval for the overall schedule progression
+        let currentStageIndex = -1; // -1 means not started, 0 means first stage
+        let isGlobalPaused = false;
+        let isGlobalStarted = false;
+
+        let suneungCurrentAbsoluteSeconds = 0; // The current absolute time in seconds from midnight for the simulation
+        let simulationStartTimeSeconds = 0; // User-defined start time in seconds from midnight
+        let suneungAbsoluteSchedule = []; // To store calculated absolute start/end times for each stage
+
+        const suneungTimeDisplay = document.getElementById('suneungTimeDisplay');
+        const startHourInput = document.getElementById('startHour');
+        const startMinuteInput = document.getElementById('startMinute');
+        const startAllBtn = document.getElementById('startAllBtn');
+        const pauseAllBtn = document.getElementById('pauseAllBtn');
+        const passBtn = document.getElementById('passBtn');
+        const resetAllBtn = document.getElementById('resetAllBtn');
+
+        const currentSubjectDisplay = document.getElementById('currentSubjectDisplay');
+        const mainClockCanvas = document.getElementById('mainClockCanvas');
+        const mainDigitalTimerDisplay = document.getElementById('mainDigitalTimerDisplay');
+        const scheduleList = document.getElementById('scheduleList');
+
+        const completionModal = document.getElementById('completionModal');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        /**
+         * Formats seconds into HH:MM:SS format.
+         * @param {number} totalSeconds - The total number of seconds from a reference point (e.g., midnight).
+         * @returns {string} Formatted time string.
+         */
+        function formatAbsoluteTime(totalSeconds) {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        /**
+         * Formats seconds into MM:SS format for remaining time.
+         * @param {number} totalSeconds - The total number of seconds.
+         * @returns {string} Formatted time string.
+         */
+        function formatRemainingTime(totalSeconds) {
+            if (totalSeconds < 0) return "00:00";
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        /**
+         * Draws the analog clock on the given canvas based on absolute time.
+         * @param {HTMLCanvasElement} canvas - The canvas element to draw on.
+         * @param {number} absoluteSeconds - The absolute time in seconds (e.g., from midnight).
+         */
+        function drawClock(canvas, absoluteSeconds) {
+            const ctx = canvas.getContext('2d');
+            const radius = canvas.width / 2;
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+            ctx.save(); // Save the current state
+            ctx.translate(radius, radius); // Move origin to center
+
+            // Draw clock face (improved)
+            ctx.beginPath();
+            ctx.arc(0, 0, radius - 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#f8f8f8'; // Off-white for a softer look
+            ctx.fill();
+            ctx.strokeStyle = '#a0aec0'; // Lighter gray border
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Draw center dot
+            ctx.beginPath();
+            ctx.arc(0, 0, 3, 0, 2 * Math.PI);
+            ctx.fillStyle = '#4a5568';
+            ctx.fill();
+
+            // Draw hour numbers (1 to 12)
+            ctx.font = `${radius * 0.15}px Inter`;
+            ctx.textBaseline = 'middle';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#2d3748'; // Darker text for better contrast
+
+            for (let i = 1; i <= 12; i++) {
+                const angle = (i * 30 * Math.PI) / 180 - (Math.PI / 2); // 30 degrees per hour, adjust for 12 at top
+                const x = radius * 0.7 * Math.cos(angle); // Slightly closer to center
+                const y = radius * 0.7 * Math.sin(angle);
+                ctx.fillText(i.toString(), x, y);
+            }
+
+            // Draw minute marks (more distinct)
+            for (let i = 0; i < 60; i++) {
+                const angle = (i * 6 * Math.PI) / 180; // 6 degrees per minute mark
+                ctx.beginPath();
+                ctx.lineWidth = (i % 5 === 0) ? 4 : 2; // Thicker for every 5 minutes, thinner for others
+                ctx.strokeStyle = (i % 5 === 0) ? '#4a5568' : '#cbd5e0'; // Darker for hour marks, lighter for minutes
+                const startPoint = (i % 5 === 0) ? radius * 0.85 : radius * 0.9; // Longer for hour marks
+                ctx.moveTo(startPoint * Math.sin(angle), -startPoint * Math.cos(angle));
+                ctx.lineTo((radius - 5) * Math.sin(angle), -(radius - 5) * Math.cos(angle));
+                ctx.stroke();
+            }
+
+            // Calculate hours, minutes, seconds from absoluteSeconds
+            const hours = Math.floor(absoluteSeconds / 3600);
+            const minutes = Math.floor((absoluteSeconds % 3600) / 60);
+            const seconds = absoluteSeconds % 60;
+
+            // Draw hour hand (more defined shape)
+            let hourAngle = ((hours % 12) + minutes / 60 + seconds / 3600) * (Math.PI / 6) - (Math.PI / 2);
+            ctx.beginPath();
+            ctx.lineWidth = 8; // Thicker
+            ctx.strokeStyle = '#2d3748'; // Darker color
+            ctx.lineCap = 'round';
+            ctx.moveTo(0, 0);
+            ctx.lineTo((radius * 0.45) * Math.cos(hourAngle), (radius * 0.45) * Math.sin(hourAngle));
+            ctx.stroke();
+
+            // Draw minute hand (more defined shape)
+            let minuteAngle = (minutes + seconds / 60) * (Math.PI / 30) - (Math.PI / 2);
+            ctx.beginPath();
+            ctx.lineWidth = 6; // Thicker
+            ctx.strokeStyle = '#4f46e5'; // Indigo
+            ctx.lineCap = 'round';
+            ctx.moveTo(0, 0);
+            ctx.lineTo((radius * 0.65) * Math.cos(minuteAngle), (radius * 0.65) * Math.sin(minuteAngle));
+            ctx.stroke();
+
+            // Draw second hand (thinner, with a counterweight)
+            let secondAngle = seconds * (Math.PI / 30) - (Math.PI / 2);
+            ctx.beginPath();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ef4444'; // Red
+            ctx.lineCap = 'round';
+            ctx.moveTo(0, 0);
+            ctx.lineTo((radius * 0.8) * Math.cos(secondAngle), (radius * 0.8) * Math.sin(secondAngle));
+            // Add a small counterweight for realism
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-(radius * 0.15) * Math.cos(secondAngle), -(radius * 0.15) * Math.sin(secondAngle));
+            ctx.stroke();
+
+            // Draw center pin (on top of hands)
+            ctx.beginPath();
+            ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#4a5568';
+            ctx.fill();
+
+            ctx.restore(); // Restore the original state
+        }
+
+        /**
+         * Calculates the absolute start and end times for each stage based on the simulation start time.
+         */
+        function calculateAbsoluteSchedule() {
+            let currentAbsoluteTime = simulationStartTimeSeconds;
+            suneungAbsoluteSchedule = suneungSchedule.map(stage => {
+                const startTime = currentAbsoluteTime;
+                const endTime = currentAbsoluteTime + stage.duration;
+                currentAbsoluteTime = endTime;
+                return {
+                    ...stage,
+                    startTime: startTime,
+                    endTime: endTime
+                };
+            });
+        }
+
+        /**
+         * Initializes the UI for the single clock and schedule overview.
+         */
+        function initializeUI() {
+            // Get user-defined start time
+            const hour = parseInt(startHourInput.value);
+            const minute = parseInt(startMinuteInput.value);
+            simulationStartTimeSeconds = hour * 3600 + minute * 60;
+            calculateAbsoluteSchedule(); // Recalculate all stage times
+
+            // Reset global state
+            isGlobalStarted = false;
+            isGlobalPaused = false;
+            currentStageIndex = -1;
+            suneungCurrentAbsoluteSeconds = simulationStartTimeSeconds; // Start at the defined entrance time
+
+            // Update displays
+            updateSuneungTimeDisplay();
+            currentSubjectDisplay.textContent = "시뮬레이션 대기 중";
+            mainDigitalTimerDisplay.textContent = "--:--";
+            drawClock(mainClockCanvas, simulationStartTimeSeconds); // Draw initial clock
+
+            updateGlobalButtonStates();
+            populateScheduleOverview(); // Populate the schedule list
+            hideCompletionModal(); // Ensure modal is hidden on init
+        }
+
+        /**
+         * Populates the schedule overview list.
+         */
+        function populateScheduleOverview() {
+            scheduleList.innerHTML = ''; // Clear existing list
+            suneungAbsoluteSchedule.forEach((stage, index) => {
+                const listItem = document.createElement('li');
+                listItem.id = `schedule-item-${index}`;
+                const startTimeFormatted = formatAbsoluteTime(stage.startTime).substring(0, 5); // HH:MM
+                const endTimeFormatted = formatAbsoluteTime(stage.endTime).substring(0, 5); // HH:MM
+                listItem.textContent = `${stage.name}: ${startTimeFormatted} ~ ${endTimeFormatted} (${Math.floor(stage.duration / 60)}분)`;
+                listItem.classList.add('py-1', 'px-2', 'rounded-md', 'mb-1');
+                scheduleList.appendChild(listItem);
+            });
+        }
+
+        /**
+         * Starts the overall Suneung schedule.
+         */
+        function startAll() {
+            if (isGlobalStarted && !isGlobalPaused) return; // Already running or just resumed
+
+            // Get user-defined start time and validate
+            const hour = parseInt(startHourInput.value);
+            const minute = parseInt(startMinuteInput.value);
+            if (isNaN(hour) || isNaN(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                console.error("유효하지 않은 시작 시간입니다. 시간(0-23)과 분(0-59)을 올바르게 입력해주세요.");
+                return;
+            }
+
+            // Only recalculate schedule if it's a fresh start (not resuming from pause)
+            if (!isGlobalStarted) {
+                simulationStartTimeSeconds = hour * 3600 + minute * 60;
+                calculateAbsoluteSchedule();
+                currentStageIndex = 0; // Start from the first stage
+                suneungCurrentAbsoluteSeconds = simulationStartTimeSeconds; // Initialize Suneung time
+                populateScheduleOverview(); // Re-populate to ensure times are correct if start time changed
+            }
+
+            isGlobalStarted = true;
+            isGlobalPaused = false;
+            updateGlobalButtonStates();
+            hideCompletionModal(); // Hide modal if it was shown and starting again
+
+            // Start the global timer interval
+            globalTimerInterval = setInterval(() => {
+                suneungCurrentAbsoluteSeconds++;
+                updateSuneungTimeDisplay();
+
+                // Determine the current active stage
+                let foundStageIndex = -1;
+                for (let i = 0; i < suneungAbsoluteSchedule.length; i++) {
+                    if (suneungCurrentAbsoluteSeconds >= suneungAbsoluteSchedule[i].startTime &&
+                        suneungCurrentAbsoluteSeconds < suneungAbsoluteSchedule[i].endTime) {
+                        foundStageIndex = i;
+                        break;
+                    }
+                }
+
+                // Handle stage transitions or completion
+                if (foundStageIndex !== currentStageIndex) {
+                    // Remove highlight from previous stage if any
+                    if (currentStageIndex !== -1 && currentStageIndex < suneungAbsoluteSchedule.length) {
+                        document.getElementById(`schedule-item-${currentStageIndex}`).classList.remove('bg-indigo-100', 'font-bold');
+                    }
+
+                    currentStageIndex = foundStageIndex;
+
+                    if (currentStageIndex !== -1 && currentStageIndex < suneungAbsoluteSchedule.length) {
+                        // New stage started
+                        currentSubjectDisplay.textContent = suneungAbsoluteSchedule[currentStageIndex].name;
+                        document.getElementById(`schedule-item-${currentStageIndex}`).classList.add('bg-indigo-100', 'font-bold');
+                    } else if (currentStageIndex === suneungAbsoluteSchedule.length) {
+                        // All stages completed
+                        clearInterval(globalTimerInterval);
+                        globalTimerInterval = null;
+                        isGlobalStarted = false;
+                        isGlobalPaused = false;
+                        currentStageIndex = -1;
+                        updateGlobalButtonStates();
+                        suneungTimeDisplay.textContent = "수능 시뮬레이션 완료!";
+                        currentSubjectDisplay.textContent = "시뮬레이션 완료!";
+                        mainDigitalTimerDisplay.textContent = "00:00";
+                        console.log("수능 시뮬레이션 완료!");
+                        showCompletionModal(); // Show the completion message
+                        return; // Exit to prevent further updates
+                    } else {
+                        // Before the first stage or an unexpected state
+                        currentSubjectDisplay.textContent = "시뮬레이션 대기 중";
+                        mainDigitalTimerDisplay.textContent = "--:--";
+                    }
+                }
+
+                // Update the main clock and digital remaining time for the current active stage
+                if (currentStageIndex !== -1 && currentStageIndex < suneungAbsoluteSchedule.length) {
+                    const currentStage = suneungAbsoluteSchedule[currentStageIndex];
+                    const remaining = currentStage.endTime - suneungCurrentAbsoluteSeconds;
+                    mainDigitalTimerDisplay.textContent = formatRemainingTime(remaining > 0 ? remaining : 0);
+                    drawClock(mainClockCanvas, suneungCurrentAbsoluteSeconds);
+                } else {
+                    // If no active stage (before start or after end)
+                    drawClock(mainClockCanvas, suneungCurrentAbsoluteSeconds);
+                }
+
+            }, 1000);
+        }
+
+        /**
+         * Pauses the overall Suneung schedule.
+         */
+        function pauseAll() {
+            if (!isGlobalStarted || isGlobalPaused) return; // Not started or already paused
+
+            isGlobalPaused = true;
+            clearInterval(globalTimerInterval); // Clear the global interval
+            globalTimerInterval = null;
+            updateGlobalButtonStates();
+        }
+
+        /**
+         * Skips to the end of the current stage.
+         */
+        function passStage() {
+            if (!isGlobalStarted || currentStageIndex === -1 || currentStageIndex >= suneungAbsoluteSchedule.length) {
+                console.log("현재 통과할 교시가 없습니다.");
+                return;
+            }
+
+            // Set the current time to the end of the current stage
+            suneungCurrentAbsoluteSeconds = suneungAbsoluteSchedule[currentStageIndex].endTime;
+
+            // If the timer is running, let the next tick handle the transition.
+            // If paused, we need to manually force the update and then re-pause.
+            if (globalTimerInterval) {
+                // The next tick will naturally advance the stage. No explicit action needed here.
+            } else {
+                // If paused, simulate one tick to process the stage end and then re-pause.
+                // Temporarily set isGlobalStarted to true to allow update logic to run.
+                const wasPaused = isGlobalPaused;
+                isGlobalStarted = true;
+                isGlobalPaused = false; // Temporarily unpause to trigger update
+                // Manually call the update logic for the current second to process the stage end
+                updateSuneungTimeDisplay();
+                // Determine the current active stage after skipping
+                let foundStageIndex = -1;
+                for (let i = 0; i < suneungAbsoluteSchedule.length; i++) {
+                    if (suneungCurrentAbsoluteSeconds >= suneungAbsoluteSchedule[i].startTime &&
+                        suneungCurrentAbsoluteSeconds < suneungAbsoluteSchedule[i].endTime) {
+                        foundStageIndex = i;
+                        break;
+                    }
+                    // If the current time has passed the end of all stages, set foundStageIndex to length to trigger completion
+                    if (suneungCurrentAbsoluteSeconds >= suneungAbsoluteSchedule[suneungAbsoluteSchedule.length - 1].endTime) {
+                        foundStageIndex = suneungAbsoluteSchedule.length;
+                    }
+                }
+                // Handle stage transitions or completion manually
+                if (foundStageIndex !== currentStageIndex) {
+                    if (currentStageIndex !== -1 && currentStageIndex < suneungAbsoluteSchedule.length) {
+                        document.getElementById(`schedule-item-${currentStageIndex}`).classList.remove('bg-indigo-100', 'font-bold');
+                    }
+                    currentStageIndex = foundStageIndex;
+                    if (currentStageIndex !== -1 && currentStageIndex < suneungAbsoluteSchedule.length) {
+                        currentSubjectDisplay.textContent = suneungAbsoluteSchedule[currentStageIndex].name;
+                        document.getElementById(`schedule-item-${currentStageIndex}`).classList.add('bg-indigo-100', 'font-bold');
+                    } else if (currentStageIndex === suneungAbsoluteSchedule.length) {
+                        suneungTimeDisplay.textContent = "수능 시뮬레이션 완료!";
+                        currentSubjectDisplay.textContent = "시뮬레이션 완료!";
+                        mainDigitalTimerDisplay.textContent = "00:00";
+                        console.log("수능 시뮬레이션 완료!");
+                        isGlobalStarted = false; // Ensure it's marked as finished
+                        isGlobalPaused = false; // Ensure it's marked as finished
+                        currentStageIndex = -1;
+                        showCompletionModal(); // Show the completion message
+                    } else {
+                        currentSubjectDisplay.textContent = "시뮬레이션 대기 중";
+                        mainDigitalTimerDisplay.textContent = "--:--";
+                    }
+                }
+                // Update the main clock and digital remaining time
+                if (currentStageIndex !== -1 && currentStageIndex < suneungAbsoluteSchedule.length) {
+                    const currentStage = suneungAbsoluteSchedule[currentStageIndex];
+                    const remaining = currentStage.endTime - suneungCurrentAbsoluteSeconds;
+                    mainDigitalTimerDisplay.textContent = formatRemainingTime(remaining > 0 ? remaining : 0);
+                    drawClock(mainClockCanvas, suneungCurrentAbsoluteSeconds);
+                } else {
+                    drawClock(mainClockCanvas, suneungCurrentAbsoluteSeconds);
+                }
+
+                // Restore pause state if it was paused
+                if (wasPaused) {
+                    isGlobalPaused = true;
+                }
+            }
+            updateGlobalButtonStates(); // Update button states after passing stage
+        }
+
+
+        /**
+         * Resets the entire Suneung schedule.
+         */
+        function resetAll() {
+            isGlobalStarted = false;
+            isGlobalPaused = false;
+            currentStageIndex = -1;
+
+            clearInterval(globalTimerInterval);
+            globalTimerInterval = null;
+
+            initializeUI(); // Re-initialize UI to reset all states and displays
+            updateGlobalButtonStates();
+        }
+
+        /**
+         * Updates the enabled/disabled state of global control buttons.
+         */
+        function updateGlobalButtonStates() {
+            startAllBtn.disabled = (isGlobalStarted && !isGlobalPaused);
+            startAllBtn.classList.toggle('opacity-50', startAllBtn.disabled);
+            startAllBtn.classList.toggle('cursor-not-allowed', startAllBtn.disabled);
+
+            pauseAllBtn.disabled = (!isGlobalStarted || isGlobalPaused);
+            pauseAllBtn.classList.toggle('opacity-50', pauseAllBtn.disabled);
+            pauseAllBtn.classList.toggle('cursor-not-allowed', pauseAllBtn.disabled);
+
+            passBtn.disabled = (!isGlobalStarted || currentStageIndex === -1 || currentStageIndex >= suneungAbsoluteSchedule.length);
+            passBtn.classList.toggle('opacity-50', passBtn.disabled);
+            passBtn.classList.toggle('cursor-not-allowed', passBtn.disabled);
+
+            resetAllBtn.disabled = !isGlobalStarted && currentStageIndex === -1;
+            resetAllBtn.classList.toggle('opacity-50', resetAllBtn.disabled);
+            resetAllBtn.classList.toggle('cursor-not-allowed', resetAllBtn.disabled);
+
+            // Disable start time inputs when simulation is running or paused
+            const disableInputs = isGlobalStarted;
+            startHourInput.disabled = disableInputs;
+            startMinuteInput.disabled = disableInputs;
+            startHourInput.classList.toggle('opacity-50', disableInputs);
+            startMinuteInput.classList.toggle('opacity-50', disableInputs);
+        }
+
+        /**
+         * Updates the main Suneung time display.
+         */
+        function updateSuneungTimeDisplay() {
+            suneungTimeDisplay.textContent = `수능 시간: ${formatAbsoluteTime(suneungCurrentAbsoluteSeconds)}`;
+        }
+
+        /**
+         * Shows the completion modal.
+         */
+        function showCompletionModal() {
+            completionModal.classList.add('show');
+        }
+
+        /**
+         * Hides the completion modal.
+         */
+        function hideCompletionModal() {
+            completionModal.classList.remove('show');
+        }
+
+        // Event listeners for global controls
+        startAllBtn.addEventListener('click', startAll);
+        pauseAllBtn.addEventListener('click', pauseAll);
+        passBtn.addEventListener('click', passStage);
+        resetAllBtn.addEventListener('click', resetAll);
+        closeModalBtn.addEventListener('click', hideCompletionModal); // Close modal button
+
+        // Re-initialize UI if start time inputs change before global start
+        startHourInput.addEventListener('change', () => {
+            if (!isGlobalStarted) initializeUI();
+        });
+        startMinuteInput.addEventListener('change', () => {
+            if (!isGlobalStarted) initializeUI();
+        });
+
+
+        // Initial setup on window load
+        window.onload = function() {
+            initializeUI();
+        };
+
+    </script>
+
+
+</body></html>
